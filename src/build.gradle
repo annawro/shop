@@ -1,0 +1,14 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'war'
+archivesBaseName = 'resteasyservice'
+version = '1' 
+repositories {
+        mavenCentral()
+}
+dependencies {
+	compile 'org.jboss.resteasy:resteasy-jaxrs:3.0.10.Final'
+	compile 'org.jboss.resteasy:resteasy-spring:3.0.10.Final'
+	compile 'org.springframework.boot:spring-boot-starter-web:1.2.2.RELEASE'
+	compile 'org.jboss.resteasy:resteasy-jackson2-provider:3.0.10.Final'
+}  
