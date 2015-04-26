@@ -19,19 +19,12 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
 import pl.shop.cart.Cart;
 import pl.shop.cart.EmptyCartException;
@@ -41,18 +34,14 @@ import pl.shop.warehouse.WarehouseService;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:dispatcher-servlet.xml" })
 @DirtiesContext
-@Ignore
-public class CartIntegrationTest implements ApplicationContextAware {
+public class CartIntegrationTest extends IntegrationServer {
 
 	private static final String REMOVE = "remove";
 	private static final String ADD = "add";
 	private static final String ALL_CART = "allCart";
-	private static final int PORT=12789;
-	private static final String HTTP_LOCALHOST_CART = "http://localhost:"+PORT+"/cart/";
 	private static TJWSEmbeddedJaxrsServer server;
 	private static List<Product> products;
 
-	ApplicationContext applicationContext;
 	WarehouseService warehouse;
 	Cart cart;
 
@@ -69,7 +58,7 @@ public class CartIntegrationTest implements ApplicationContextAware {
 		products.add(product1);
 		products.add(product2);
 		products.add(product3);
-		server = TestServer.getInstance().startServerOnPort(PORT);
+		server = initServer();
 	}
 
 	@Before
@@ -153,7 +142,7 @@ public class CartIntegrationTest implements ApplicationContextAware {
 
 	private Builder setUpClient(String name) {
 		ResteasyClient client = new ResteasyClientBuilder().build();
-		Builder target = client.target(HTTP_LOCALHOST_CART + name)
+		Builder target = client.target(getUrl() + name)
 				.request();
 		return target;
 	}
@@ -164,10 +153,12 @@ public class CartIntegrationTest implements ApplicationContextAware {
 		server = null;
 	}
 
+
 	@Override
-	public void setApplicationContext(final ApplicationContext context)
-			throws BeansException {
-		applicationContext = context;
+	protected String getService() {
+		return "/cart/";
 	}
+
+	
 
 }

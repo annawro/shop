@@ -16,24 +16,16 @@ import org.jboss.resteasy.plugins.server.tjws.TJWSEmbeddedJaxrsServer;
 import org.jboss.resteasy.plugins.spring.SpringBeanProcessor;
 import org.jboss.resteasy.plugins.spring.SpringResourceFactory;
 import org.jboss.resteasy.spi.ResteasyDeployment;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
-import pl.shop.cart.Cart;
 import pl.shop.model.Product;
 import pl.shop.shop.Shop;
 import pl.shop.warehouse.WarehouseService;
@@ -41,26 +33,20 @@ import pl.shop.warehouse.WarehouseService;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:dispatcher-servlet.xml" })
 @DirtiesContext
-public class ShopIntegrationTest implements ApplicationContextAware {
+public class ShopIntegrationTest extends IntegrationServer {
 
 	private static final String PRODUCTS = "products";
 
 	private static final String SEARCH = "search";
 	
-	private static final int PORT = 12345;
-
-	private static final String HTTP_LOCALHOST_SHOP = "http://localhost:"+PORT+"/shop/";
-
 	private static TJWSEmbeddedJaxrsServer server;
-
-	ApplicationContext applicationContext;
 
 	WarehouseService warehouse;
 
 	@BeforeClass
 	public static void start() {
 
-		server = TestServer.INSTANCE.startServerOnPort(PORT);
+		server = initServer();
 	}
 
 	@Before
@@ -74,7 +60,6 @@ public class ShopIntegrationTest implements ApplicationContextAware {
 		SpringResourceFactory noDefaults = new SpringResourceFactory("shop",
 				applicationContext, Shop.class);
 		dispatcher.getRegistry().addResourceFactory(noDefaults);
-
 		
 		warehouse = applicationContext.getBean(WarehouseService.class);
 		
@@ -124,7 +109,7 @@ public class ShopIntegrationTest implements ApplicationContextAware {
 		
 	private Builder setUpClient(String name) {
 		ResteasyClient client = new ResteasyClientBuilder().build();
-		Builder target = client.target(HTTP_LOCALHOST_SHOP + name)
+		Builder target = client.target(getUrl() + name)
 				.request();
 		return target;
 
@@ -138,9 +123,8 @@ public class ShopIntegrationTest implements ApplicationContextAware {
 	}
 
 	@Override
-	public void setApplicationContext(final ApplicationContext context)
-			throws BeansException {
-		applicationContext = context;
+	protected String getService() {
+		return "/shop/";
 	}
 
 }
